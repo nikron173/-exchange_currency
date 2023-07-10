@@ -1,4 +1,6 @@
-create database conversion_db;
+create database conversion_db ENCODING 'UTF8'
+    LC_COLLATE = 'en_US.UTF-8'
+    LC_CTYPE = 'en_US.UTF-8';
 create role conversion_user password 'kek123';
 grant all on database conversion_db to conversion_user;
 grant connect on database conversion_db to conversion_user;
