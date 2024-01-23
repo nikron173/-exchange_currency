@@ -1,16 +1,13 @@
-package com.nikron.conversion.model;
+package com.nikron.conversion.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@AllArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class Currency {
-    private long id;
+public class CurrencyRequestDto {
     private String code;
     private String fullName;
     private String sign;
