@@ -16,7 +16,7 @@ public class DataBaseServiceImpl implements DataBaseService {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            throw new DataBaseException("Драйвер не найден");
+            throw new DataBaseException("Драйвер не найден", 500);
         }
             SQLiteConfig config = new SQLiteConfig();
             config.setEncoding(SQLiteConfig.Encoding.UTF8);
@@ -26,7 +26,7 @@ public class DataBaseServiceImpl implements DataBaseService {
             connection.setAutoCommit(true);
             return connection;
         } catch (SQLException e){
-            throw new DataBaseException("База данных не доступна");
+            throw new DataBaseException("База данных не доступна", 500);
         }
     }
 
@@ -36,9 +36,9 @@ public class DataBaseServiceImpl implements DataBaseService {
             try {
                 return String.format("jdbc:sqlite:" + url.toURI());
             } catch (URISyntaxException e) {
-                throw new RuntimeException("Ошибка синтаксиса URI");
+                throw new DataBaseException("Ошибка синтаксиса строки подключения к БД", 500);
             }
         }
-        throw new RuntimeException("Строка подключения URI содержит null.");
+        throw new DataBaseException("Строка подключения URI содержит null.", 500);
     }
 }

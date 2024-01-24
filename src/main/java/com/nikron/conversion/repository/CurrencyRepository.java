@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-public class CurrencyRepository implements ImpRepository<Currency> {
+public class CurrencyRepository implements ImpRepository<Long, Currency> {
 
     private final Connection connection = new DataBaseServiceImpl().getDataBaseConnection();
     private final CurrencyMapper mapper = new CurrencyMapper();
 
     @Override
-    public Optional<Currency> findById(long id) {
+    public Optional<Currency> findById(Long id) {
         String findById = "SELECT id, code, full_name, sign FROM currency WHERE id=?";
         try (PreparedStatement ps = connection.prepareStatement(findById)) {
             ps.setLong(1, id);
@@ -65,14 +65,13 @@ public class CurrencyRepository implements ImpRepository<Currency> {
             return Optional.of(tObject);
         } catch (SQLException e) {
             if (SQLiteErrorCode.SQLITE_CONSTRAINT.code == e.getErrorCode())
-                throw new DuplicateException("Code " + tObject.getCode() + " уже существует.");
+                throw new DuplicateException("Code " + tObject.getCode() + " уже существует.", 400);
             throw new RuntimeException(e);
         }
     }
 
-    @Override
-    public Optional<Currency> change(long id, Currency tObject) {
-        findById(id).orElseThrow(() -> new NotFoundException("Объект с id " + id + " не найден!"));
+    public Optional<Currency> change(Long id, Currency tObject) {
+        findById(id).orElseThrow(() -> new NotFoundException("Объект с id " + id + " не найден!", 404));
         String updateCurrency = "UPDATE currency SET code=?, full_name=?, sign=? WHERE id=?";
         try (PreparedStatement ps = connection.prepareStatement(updateCurrency)) {
             ps.setString(1, tObject.getCode());
@@ -88,8 +87,8 @@ public class CurrencyRepository implements ImpRepository<Currency> {
     }
 
     @Override
-    public void delete(long id) {
-        findById(id).orElseThrow(() -> new NotFoundException("Объект с id " + id + " не найден!"));
+    public void delete(Long id) {
+        findById(id).orElseThrow(() -> new NotFoundException("Объект с id " + id + " не найден!", 404));
         String deleteCurrency = "DELETE FROM currency WHERE id=?";
         try (PreparedStatement ps = connection.prepareStatement(deleteCurrency)) {
             ps.setLong(1, id);
@@ -100,7 +99,7 @@ public class CurrencyRepository implements ImpRepository<Currency> {
     }
 
     public void delete(String code) {
-        findByCode(code).orElseThrow(() -> new NotFoundException("Объект с code " + code + " не найден!"));
+        findByCode(code).orElseThrow(() -> new NotFoundException("Объект с code " + code + " не найден!", 404));
         String deleteCurrency = "DELETE FROM currency WHERE code=?";
         try (PreparedStatement ps = connection.prepareStatement(deleteCurrency)) {
             ps.setString(1, code);

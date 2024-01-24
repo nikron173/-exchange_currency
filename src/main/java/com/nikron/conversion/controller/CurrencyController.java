@@ -1,5 +1,6 @@
 package com.nikron.conversion.controller;
 
+import com.nikron.conversion.exception.BadRequestException;
 import com.nikron.conversion.mapper.CurrencyMapper;
 import com.nikron.conversion.model.Currency;
 import com.nikron.conversion.service.CurrencyService;
@@ -21,13 +22,13 @@ public class CurrencyController extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setHeader("Content-Type", "application/json; charset=utf-8");
         Optional<?> query = UriStringMatch.uriMatch(req.getRequestURI());
         var writer = resp.getWriter();
         if (query.isEmpty()) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            writer.println("{\"message\": \"Uri " + req.getRequestURI() + " not correctly.\"}");
-        } else if (query.get() instanceof Long) {
+            throw new BadRequestException("Uri " + req.getRequestURI() + " not correctly.",
+                    HttpServletResponse.SC_BAD_REQUEST);
+        }
+        if (query.get() instanceof Long) {
             Long id = (Long) query.get();
             Currency currency = service.findById(id);
             resp.setStatus(HttpServletResponse.SC_OK);
@@ -43,12 +44,12 @@ public class CurrencyController extends HttpServlet {
 
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setHeader("Content-Type", "application/json; charset=utf-8");
         Optional<?> query = UriStringMatch.uriMatch(req.getRequestURI());
         if (query.isEmpty()) {
-            resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            resp.getWriter().println("{\"message\": \"Uri " + req.getRequestURI() + " not correctly.\"}");
-        } else if (query.get() instanceof Long) {
+            throw new BadRequestException("Uri " + req.getRequestURI() + " not correctly.",
+                    HttpServletResponse.SC_BAD_REQUEST);
+        }
+        if (query.get() instanceof Long) {
             Long id = (Long) query.get();
             service.delete(id);
             resp.setStatus(HttpServletResponse.SC_OK);

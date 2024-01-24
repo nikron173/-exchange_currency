@@ -22,7 +22,7 @@ public class CurrencyService {
         if (currency.isPresent()) {
             return currency.get();
         }
-        throw new NotFoundException("Currency id " + id + " не найден.");
+        throw new NotFoundException("Currency id " + id + " не найден.", 404);
     }
 
     public Currency save(Currency currency) {

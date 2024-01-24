@@ -43,9 +43,9 @@ INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (
 INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (5, 7, 0.0055);
 INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (3, 7, 0.78);
 
--- select e.id, b.id, b.code, b.full_name, b.sign, t.id, t.code, t.full_name, t.sign, e.rate from exchange_rates as e
---  JOIN currency as b ON e.base_currency_id = b.id and e.id = ?
---  JOIN currency as t ON e.target_currency_id = t.id ;
+select e.id, b.id, b.code, b.full_name, b.sign, t.id, t.code, t.full_name, t.sign, e.rate from exchange_rates as e
+ JOIN currency as b ON e.base_currency_id = b.id and e.id = ?
+ JOIN currency as t ON e.target_currency_id = t.id ;
 
 -- select e.id, (b.code || t.code) as code, (t.code || b.code) as rev_code, e.rate from exchange_rates as e
 --  JOIN currency as b ON e.base_currency_id = b.id
@@ -53,13 +53,27 @@ INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate) VALUES (
 -- WHERE code = ? or rev_code = ?;
 
 --склейка строк, ищет по склейке
-select e.id, (b.code || t.code) as codex, e.rate from exchange_rates as e
- JOIN currency as b ON e.base_currency_id = b.id
- JOIN currency as t ON e.target_currency_id = t.id
-WHERE codex = ?;
+-- select e.id, (b.code || t.code) as codex, e.rate from exchange_rates as e
+--  JOIN currency as b ON e.base_currency_id = b.id
+--  JOIN currency as t ON e.target_currency_id = t.id
+-- WHERE codex = ?;
 
 --обратная склейка кодов и обратный rate
 -- select e.id, (t.code || b.code) as rev_codex, round((1/e.rate), 6) as rev_rate from exchange_rates as e
 --   JOIN currency as b ON e.base_currency_id = b.id
 --   JOIN currency as t ON e.target_currency_id = t.id
 -- WHERE rev_codex = ?;
+
+
+-- select e.id, b.code, t.code, e.rate from exchange_rates as e
+--   JOIN currency as b ON e.base_currency_id = b.id
+--   JOIN currency as t ON e.target_currency_id = t.id
+-- WHERE (b.code || t.code) = 'USDRUB';
+
+-- select e.id, b.id, b.code, b.full_name, b.sign, t.id, t.code, t.full_name, t.sign, e.rate from exchange_rates as e
+--     JOIN currency as b ON e.base_currency_id = b.id
+--     JOIN currency as t ON e.target_currency_id = t.id and (b.code || t.code) = ?;
+
+-- select e.id, t.id, t.code, t.full_name, t.sign, b.id, b.code, b.full_name, b.sign, round((1/e.rate), 6) as rev_rate from exchange_rates as e
+-- JOIN currency as b ON e.base_currency_id = b.id
+-- JOIN currency as t ON e.target_currency_id = t.id and (t.code || b.code) = ?;

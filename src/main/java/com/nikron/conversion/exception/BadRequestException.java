@@ -1,7 +1,7 @@
 package com.nikron.conversion.exception;
 
-public class BadRequestException extends RuntimeException {
-    public BadRequestException(String message) {
-        super(message);
+public class BadRequestException extends ApplicationException {
+    public BadRequestException(String message, int status) {
+        super(message, status);
     }
 }

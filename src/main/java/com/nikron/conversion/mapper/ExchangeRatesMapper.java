@@ -2,9 +2,11 @@ package com.nikron.conversion.mapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nikron.conversion.exception.BadRequestException;
 import com.nikron.conversion.model.Currency;
 import com.nikron.conversion.model.ExchangeRates;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -34,17 +36,23 @@ public class ExchangeRatesMapper {
     }
 
     public boolean checkParameter(HttpServletRequest req) {
-        String baseCurrencyId = req.getParameter("baseCurrencyId");
-        String targetCurrencyId = req.getParameter("targetCurrencyId");
+        String baseCurrencyCode = req.getParameter("baseCurrencyCode");
+        String targetCurrencyCode = req.getParameter("targetCurrencyCode");
         String rate = req.getParameter("rate");
-        if (Objects.isNull(baseCurrencyId) || Objects.isNull(targetCurrencyId)
-                || Objects.isNull(rate)) return false;
+        if (Objects.isNull(baseCurrencyCode) || Objects.isNull(targetCurrencyCode)) return false;
+        if (baseCurrencyCode.isBlank() || targetCurrencyCode.isBlank()) return false;
+        if (!checkRate(req)) return false;
+        return true;
+    }
+
+    public boolean checkRate(HttpServletRequest req) {
+        String rate = req.getParameter("rate");
+        if (Objects.isNull(rate) || rate.isBlank()) return false;
         try {
-            Long base_id = Long.parseLong(baseCurrencyId);
-            Long target_id = Long.parseLong(targetCurrencyId);
             BigDecimal bigDecimalRate = new BigDecimal(rate);
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка в передаче параметров");
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Не верно задан rate " + rate,
+                    HttpServletResponse.SC_BAD_REQUEST);
         }
         return true;
     }
