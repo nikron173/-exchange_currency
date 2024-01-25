@@ -13,6 +13,14 @@ import java.util.Objects;
 public class CurrencyMapper {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final CurrencyMapper INSTANCE_MAPPER = new CurrencyMapper();
+
+    private CurrencyMapper() {
+    }
+
+    public static CurrencyMapper getInstanceMapper(){
+        return INSTANCE_MAPPER;
+    }
 
     public Currency resultSetToCurrency(ResultSet rs) throws SQLException {
         return new Currency(rs.getInt("id"),

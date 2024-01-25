@@ -1,6 +1,7 @@
 package com.nikron.conversion.service;
 
 import com.nikron.conversion.exception.DataBaseException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.sqlite.SQLiteConfig;
 
 import java.net.URISyntaxException;
@@ -16,7 +17,7 @@ public class DataBaseServiceImpl implements DataBaseService {
         try {
             Class.forName("org.sqlite.JDBC");
         } catch (ClassNotFoundException e) {
-            throw new DataBaseException("Драйвер не найден", 500);
+            throw new DataBaseException("Драйвер не найден", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
             SQLiteConfig config = new SQLiteConfig();
             config.setEncoding(SQLiteConfig.Encoding.UTF8);
@@ -26,7 +27,7 @@ public class DataBaseServiceImpl implements DataBaseService {
             connection.setAutoCommit(true);
             return connection;
         } catch (SQLException e){
-            throw new DataBaseException("База данных не доступна", 500);
+            throw new DataBaseException("База данных не доступна", HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -36,9 +37,11 @@ public class DataBaseServiceImpl implements DataBaseService {
             try {
                 return String.format("jdbc:sqlite:" + url.toURI());
             } catch (URISyntaxException e) {
-                throw new DataBaseException("Ошибка синтаксиса строки подключения к БД", 500);
+                throw new DataBaseException("Ошибка синтаксиса строки подключения к БД",
+                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             }
         }
-        throw new DataBaseException("Строка подключения URI содержит null.", 500);
+        throw new DataBaseException("Строка подключения URI содержит null.",
+                HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 }

@@ -5,7 +5,7 @@ import com.nikron.conversion.exception.NotFoundException;
 import com.nikron.conversion.mapper.CurrencyMapper;
 import com.nikron.conversion.model.Currency;
 import com.nikron.conversion.service.DataBaseServiceImpl;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletResponse;
 import org.sqlite.SQLiteErrorCode;
 
 import java.sql.Connection;
@@ -17,11 +17,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class CurrencyRepository implements ImpRepository<Long, Currency> {
 
     private final Connection connection = new DataBaseServiceImpl().getDataBaseConnection();
-    private final CurrencyMapper mapper = new CurrencyMapper();
+    private final CurrencyMapper mapper = CurrencyMapper.getInstanceMapper();
+
+    private final static CurrencyRepository INSTANCE_REPOSITORY = new CurrencyRepository();
+
+    private CurrencyRepository() {
+    }
+
+    public static CurrencyRepository getInstanceRepository() {
+        return INSTANCE_REPOSITORY;
+    }
+
 
     @Override
     public Optional<Currency> findById(Long id) {
@@ -65,22 +74,24 @@ public class CurrencyRepository implements ImpRepository<Long, Currency> {
             return Optional.of(tObject);
         } catch (SQLException e) {
             if (SQLiteErrorCode.SQLITE_CONSTRAINT.code == e.getErrorCode())
-                throw new DuplicateException("Code " + tObject.getCode() + " уже существует.", 400);
+                throw new DuplicateException("Code " + tObject.getCode() + " уже существует.",
+                        HttpServletResponse.SC_CONFLICT);
             throw new RuntimeException(e);
         }
     }
 
-    public Optional<Currency> change(Long id, Currency tObject) {
-        findById(id).orElseThrow(() -> new NotFoundException("Объект с id " + id + " не найден!", 404));
+    public Optional<Currency> change(Long id, Currency currency) {
+        findById(id).orElseThrow(() -> new NotFoundException("Объект с id " + id + " не найден!",
+                HttpServletResponse.SC_NOT_FOUND));
         String updateCurrency = "UPDATE currency SET code=?, full_name=?, sign=? WHERE id=?";
         try (PreparedStatement ps = connection.prepareStatement(updateCurrency)) {
-            ps.setString(1, tObject.getCode());
-            ps.setString(2, tObject.getFullName());
-            ps.setString(3, tObject.getSign());
+            ps.setString(1, currency.getCode());
+            ps.setString(2, currency.getFullName());
+            ps.setString(3, currency.getSign());
             ps.setLong(4, id);
             ps.execute();
-            tObject.setId(id);
-            return Optional.of(tObject);
+            currency.setId(id);
+            return Optional.of(currency);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -88,7 +99,8 @@ public class CurrencyRepository implements ImpRepository<Long, Currency> {
 
     @Override
     public void delete(Long id) {
-        findById(id).orElseThrow(() -> new NotFoundException("Объект с id " + id + " не найден!", 404));
+        findById(id).orElseThrow(() -> new NotFoundException("Объект с id " + id + " не найден!",
+                HttpServletResponse.SC_NOT_FOUND));
         String deleteCurrency = "DELETE FROM currency WHERE id=?";
         try (PreparedStatement ps = connection.prepareStatement(deleteCurrency)) {
             ps.setLong(1, id);
@@ -99,7 +111,8 @@ public class CurrencyRepository implements ImpRepository<Long, Currency> {
     }
 
     public void delete(String code) {
-        findByCode(code).orElseThrow(() -> new NotFoundException("Объект с code " + code + " не найден!", 404));
+        findByCode(code).orElseThrow(() -> new NotFoundException("Объект с code " + code + " не найден!",
+                HttpServletResponse.SC_NOT_FOUND));
         String deleteCurrency = "DELETE FROM currency WHERE code=?";
         try (PreparedStatement ps = connection.prepareStatement(deleteCurrency)) {
             ps.setString(1, code);

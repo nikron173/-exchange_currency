@@ -17,8 +17,8 @@ import java.util.Optional;
 @WebServlet(urlPatterns = "/currency/*")
 public class CurrencyController extends HttpServlet {
 
-    private final CurrencyService service = new CurrencyService();
-    private final CurrencyMapper mapper = new CurrencyMapper();
+    private final CurrencyService service = CurrencyService.getInstanceService();
+    private final CurrencyMapper mapper = CurrencyMapper.getInstanceMapper();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

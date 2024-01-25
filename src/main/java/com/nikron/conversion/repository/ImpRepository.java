@@ -5,7 +5,9 @@ import java.util.Optional;
 
 public interface ImpRepository<K, E> {
     Optional<E> findById(K id);
+
     Optional<List<E>> findAll();
+
     Optional<E> save(E tObject);
 
     void delete(K id);

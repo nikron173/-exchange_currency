@@ -1,12 +1,10 @@
 package com.nikron.conversion.controller;
 
-import com.nikron.conversion.dto.ExchangeRatesDto;
 import com.nikron.conversion.dto.ExchangeRequestDto;
 import com.nikron.conversion.exception.BadRequestException;
 import com.nikron.conversion.mapper.ExchangeRatesMapper;
 import com.nikron.conversion.service.ExchangeRatesService;
 import com.nikron.conversion.util.JsonResponce;
-import jakarta.json.Json;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,8 +17,8 @@ import java.math.BigDecimal;
 @WebServlet(urlPatterns = "/exchange")
 public class ExchangeController extends HttpServlet {
 
-    private final ExchangeRatesService service = new ExchangeRatesService();
-    private final ExchangeRatesMapper mapper = new ExchangeRatesMapper();
+    private final ExchangeRatesService service = ExchangeRatesService.getInstanceService();
+    private final ExchangeRatesMapper mapper = ExchangeRatesMapper.getInstanceMapper();
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         if (!mapper.checkParamExchange(req)) {

@@ -5,7 +5,7 @@ import com.nikron.conversion.exception.NotFoundException;
 import com.nikron.conversion.mapper.ExchangeRatesMapper;
 import com.nikron.conversion.model.ExchangeRates;
 import com.nikron.conversion.service.DataBaseServiceImpl;
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletResponse;
 import org.sqlite.SQLiteErrorCode;
 
 import java.sql.Connection;
@@ -17,11 +17,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRates> {
 
     private final Connection connection = new DataBaseServiceImpl().getDataBaseConnection();
-    private final ExchangeRatesMapper mapper = new ExchangeRatesMapper();
+    private final ExchangeRatesMapper mapper = ExchangeRatesMapper.getInstanceMapper();
+    private static final ExchangeRatesRepository INSTANCE_REPOSITORY = new ExchangeRatesRepository();
+
+    private ExchangeRatesRepository() {
+    }
+
+    public static ExchangeRatesRepository getInstanceRepository(){
+        return INSTANCE_REPOSITORY;
+    }
 
     @Override
     public Optional<ExchangeRates> findById(Long id) {
@@ -106,7 +113,8 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
             return Optional.of(tObject);
         } catch (SQLException e) {
             if (SQLiteErrorCode.SQLITE_CONSTRAINT.code == e.getErrorCode())
-                throw new DuplicateException("Такой обменник уже существует.", 400);
+                throw new DuplicateException("Такой обменник уже существует.",
+                        HttpServletResponse.SC_NOT_FOUND);
             throw new RuntimeException(e);
         }
     }
@@ -125,7 +133,8 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
 
     @Override
     public void delete(Long id) {
-        findById(id).orElseThrow(() -> new NotFoundException("Не найдет обменник с id " + id, 404));
+        findById(id).orElseThrow(() -> new NotFoundException("Не найдет обменник с id " + id,
+                HttpServletResponse.SC_NOT_FOUND));
         String updateExchangeRates = "DELETE FROM exchange_rates WHERE id = ?";
         try (PreparedStatement ps = connection.prepareStatement(updateExchangeRates)) {
             ps.setLong(1, id);

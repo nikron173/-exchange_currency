@@ -17,8 +17,17 @@ import java.util.Optional;
 
 public class ExchangeRatesService {
 
-    private final ExchangeRatesRepository exchangeRatesRepository = new ExchangeRatesRepository();
-    private final CurrencyRepository currencyRepository = new CurrencyRepository();
+    private final ExchangeRatesRepository exchangeRatesRepository = ExchangeRatesRepository.getInstanceRepository();
+    private final CurrencyRepository currencyRepository = CurrencyRepository.getInstanceRepository();
+
+    private static final ExchangeRatesService INSTANCE_SERVICE = new ExchangeRatesService();
+
+    private ExchangeRatesService() {
+    }
+
+    public static ExchangeRatesService getInstanceService() {
+        return INSTANCE_SERVICE;
+    }
 
     public Optional<ExchangeRates> findById(long id) {
         return exchangeRatesRepository.findById(id);
@@ -41,8 +50,8 @@ public class ExchangeRatesService {
 
     public Optional<ExchangeRates> change(Long id, BigDecimal rate) {
         Optional<ExchangeRates> optionalExchangeRates = exchangeRatesRepository.findById(id);
-        if (optionalExchangeRates.isEmpty()){
-            throw new NotFoundException("Не найден обменник с id " + id, 400);
+        if (optionalExchangeRates.isEmpty()) {
+            throw new NotFoundException("Не найден обменник с id " + id, HttpServletResponse.SC_BAD_REQUEST);
         }
         ExchangeRates exchangeRates = optionalExchangeRates.get();
         exchangeRates.setRate(rate);
@@ -51,8 +60,8 @@ public class ExchangeRatesService {
 
     public Optional<ExchangeRates> change(String code, BigDecimal rate) {
         Optional<ExchangeRates> optionalExchangeRates = exchangeRatesRepository.findByCode(code);
-        if (optionalExchangeRates.isEmpty()){
-            throw new NotFoundException("Не найден обменник с id " + code, 400);
+        if (optionalExchangeRates.isEmpty()) {
+            throw new NotFoundException("Не найден обменник с id " + code, HttpServletResponse.SC_BAD_REQUEST);
         }
         ExchangeRates exchangeRates = optionalExchangeRates.get();
         exchangeRates.setRate(rate);
@@ -83,9 +92,9 @@ public class ExchangeRatesService {
     }
 
     public ExchangeResponseDto exchange(ExchangeRequestDto dto) {
-        Optional<ExchangeRates> exchangeRates = findByCode(dto.getBaseCurrencyCode()+dto.getTargetCurrencyCode());
-        if (exchangeRates.isEmpty()){
-            throw new BadRequestException("Не найдет обменник валюты " + dto.getBaseCurrencyCode()
+        Optional<ExchangeRates> exchangeRates = findByCode(dto.getBaseCurrencyCode() + dto.getTargetCurrencyCode());
+        if (exchangeRates.isEmpty()) {
+            throw new BadRequestException("Не найдет обменник валюты " + dto.getBaseCurrencyCode() + " => "
                     + dto.getTargetCurrencyCode(), HttpServletResponse.SC_BAD_REQUEST);
         }
         ExchangeResponseDto dtoResponse = new ExchangeResponseDto();

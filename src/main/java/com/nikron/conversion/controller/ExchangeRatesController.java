@@ -19,9 +19,9 @@ import java.util.Optional;
 @WebServlet(urlPatterns = "/exchangeRates")
 public class ExchangeRatesController extends HttpServlet {
 
-    private final ExchangeRatesMapper mapper = new ExchangeRatesMapper();
+    private final ExchangeRatesMapper mapper = ExchangeRatesMapper.getInstanceMapper();
 
-    private final ExchangeRatesService service = new ExchangeRatesService();
+    private final ExchangeRatesService service = ExchangeRatesService.getInstanceService();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

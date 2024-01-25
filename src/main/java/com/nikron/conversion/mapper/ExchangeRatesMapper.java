@@ -15,6 +15,14 @@ import java.util.Objects;
 
 public class ExchangeRatesMapper {
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final static ExchangeRatesMapper INSTANCE_MAPPER = new ExchangeRatesMapper();
+
+    private ExchangeRatesMapper() {
+    }
+
+    public static ExchangeRatesMapper getInstanceMapper() {
+        return INSTANCE_MAPPER;
+    }
 
     public ExchangeRates resultSetToExchangeRates(ResultSet rs) throws SQLException {
         return new ExchangeRates(
@@ -39,7 +47,8 @@ public class ExchangeRatesMapper {
         String baseCurrencyCode = req.getParameter("baseCurrencyCode");
         String targetCurrencyCode = req.getParameter("targetCurrencyCode");
         String rate = req.getParameter("rate");
-        if (Objects.isNull(baseCurrencyCode) || Objects.isNull(targetCurrencyCode) || Objects.isNull(rate)) return false;
+        if (Objects.isNull(baseCurrencyCode) || Objects.isNull(targetCurrencyCode) || Objects.isNull(rate))
+            return false;
         if (baseCurrencyCode.isBlank() || targetCurrencyCode.isBlank() || rate.isBlank()) return false;
         return checkBigDecimal(rate);
     }

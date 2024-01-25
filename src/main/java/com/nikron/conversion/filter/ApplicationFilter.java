@@ -2,7 +2,6 @@ package com.nikron.conversion.filter;
 
 import com.nikron.conversion.dto.ExceptionDto;
 import com.nikron.conversion.exception.ApplicationException;
-import com.nikron.conversion.exception.BadRequestException;
 import com.nikron.conversion.util.JsonResponce;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -14,6 +13,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @WebFilter(urlPatterns = "/*")
 public class ApplicationFilter extends HttpFilter {
@@ -21,8 +21,8 @@ public class ApplicationFilter extends HttpFilter {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
-        request.setCharacterEncoding("UTF-8");
-        response.setCharacterEncoding("UTF-8");
+        request.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.setContentType("application/json");
 
         try {
