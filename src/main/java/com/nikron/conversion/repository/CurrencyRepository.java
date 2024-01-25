@@ -65,7 +65,7 @@ public class CurrencyRepository implements ImpRepository<Long, Currency> {
     public Optional<Currency> save(Currency tObject) {
         String saveCurrency = "INSERT INTO currency(code, full_name, sign) VALUES (?,?,?)";
         try (PreparedStatement ps = connection.prepareStatement(saveCurrency, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, tObject.getCode());
+            ps.setString(1, tObject.getCode().toUpperCase());
             ps.setString(2, tObject.getFullName());
             ps.setString(3, tObject.getSign());
             ps.executeUpdate();
