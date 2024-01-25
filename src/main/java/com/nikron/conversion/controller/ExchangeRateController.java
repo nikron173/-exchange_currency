@@ -3,7 +3,6 @@ package com.nikron.conversion.controller;
 import com.nikron.conversion.exception.BadRequestException;
 import com.nikron.conversion.mapper.ExchangeRatesMapper;
 import com.nikron.conversion.model.ExchangeRates;
-import com.nikron.conversion.service.CurrencyService;
 import com.nikron.conversion.service.ExchangeRatesService;
 import com.nikron.conversion.util.JsonResponce;
 import com.nikron.conversion.util.UriStringMatch;
@@ -49,7 +48,8 @@ public class ExchangeRateController extends HttpServlet {
 
     protected void doPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Optional<?> query = UriStringMatch.uriMatch(req.getRequestURI());
-        if (query.isEmpty() || Objects.isNull(req.getParameter("rate")) || !mapper.checkRate(req)) {
+        if (query.isEmpty() || Objects.isNull(req.getParameter("rate")) ||
+                !mapper.checkBigDecimal(req.getParameter("rate"))) {
             throw new BadRequestException("Не задан rate (double) или ошибка в запросе uri " + req.getRequestURI(),
                     HttpServletResponse.SC_BAD_REQUEST);
         }

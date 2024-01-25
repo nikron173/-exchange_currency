@@ -1,5 +1,7 @@
 package com.nikron.conversion.util;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import java.util.Optional;
 
 public class UriStringMatch {

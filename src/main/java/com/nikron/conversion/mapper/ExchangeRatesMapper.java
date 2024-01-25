@@ -39,21 +39,27 @@ public class ExchangeRatesMapper {
         String baseCurrencyCode = req.getParameter("baseCurrencyCode");
         String targetCurrencyCode = req.getParameter("targetCurrencyCode");
         String rate = req.getParameter("rate");
-        if (Objects.isNull(baseCurrencyCode) || Objects.isNull(targetCurrencyCode)) return false;
-        if (baseCurrencyCode.isBlank() || targetCurrencyCode.isBlank()) return false;
-        if (!checkRate(req)) return false;
-        return true;
+        if (Objects.isNull(baseCurrencyCode) || Objects.isNull(targetCurrencyCode) || Objects.isNull(rate)) return false;
+        if (baseCurrencyCode.isBlank() || targetCurrencyCode.isBlank() || rate.isBlank()) return false;
+        return checkBigDecimal(rate);
     }
 
-    public boolean checkRate(HttpServletRequest req) {
-        String rate = req.getParameter("rate");
-        if (Objects.isNull(rate) || rate.isBlank()) return false;
+    public boolean checkBigDecimal(String number) {
         try {
-            BigDecimal bigDecimalRate = new BigDecimal(rate);
+            BigDecimal bigDecimalRate = new BigDecimal(number);
         } catch (NumberFormatException e) {
-            throw new BadRequestException("Не верно задан rate " + rate,
+            throw new BadRequestException("Не верно задано число " + number,
                     HttpServletResponse.SC_BAD_REQUEST);
         }
         return true;
+    }
+
+    public boolean checkParamExchange(HttpServletRequest req) {
+        String from = req.getParameter("from");
+        String to = req.getParameter("to");
+        String amount = req.getParameter("amount");
+        if (Objects.isNull(from) || Objects.isNull(to) || Objects.isNull(amount)) return false;
+        if (from.isBlank() || to.isBlank() || amount.isBlank()) return false;
+        return checkBigDecimal(amount);
     }
 }

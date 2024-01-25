@@ -1,6 +1,8 @@
 package com.nikron.conversion.service;
 
 import com.nikron.conversion.dto.ExchangeRatesDto;
+import com.nikron.conversion.dto.ExchangeRequestDto;
+import com.nikron.conversion.dto.ExchangeResponseDto;
 import com.nikron.conversion.exception.BadRequestException;
 import com.nikron.conversion.exception.NotFoundException;
 import com.nikron.conversion.model.Currency;
@@ -78,5 +80,20 @@ public class ExchangeRatesService {
         exchangeRates.setTargetCurrency(targetCurrency.get());
         exchangeRates.setRate(dto.getRate());
         return exchangeRatesRepository.save(exchangeRates);
+    }
+
+    public ExchangeResponseDto exchange(ExchangeRequestDto dto) {
+        Optional<ExchangeRates> exchangeRates = findByCode(dto.getBaseCurrencyCode()+dto.getTargetCurrencyCode());
+        if (exchangeRates.isEmpty()){
+            throw new BadRequestException("Не найдет обменник валюты " + dto.getBaseCurrencyCode()
+                    + dto.getTargetCurrencyCode(), HttpServletResponse.SC_BAD_REQUEST);
+        }
+        ExchangeResponseDto dtoResponse = new ExchangeResponseDto();
+        dtoResponse.setBaseCurrency(exchangeRates.get().getBaseCurrency());
+        dtoResponse.setTargetCurrency(exchangeRates.get().getTargetCurrency());
+        dtoResponse.setRate(exchangeRates.get().getRate());
+        dtoResponse.setAmount(dto.getAmount());
+        dtoResponse.setConvertedAmount(exchangeRates.get().getRate().multiply(dto.getAmount()));
+        return dtoResponse;
     }
 }
