@@ -31,16 +31,14 @@ public class ExchangeRateController extends HttpServlet {
                     HttpServletResponse.SC_BAD_REQUEST);
         }
         if (query.get() instanceof String) {
-            Optional<ExchangeRates> exchangeRates = service.findByCode(((String) query.get()).toUpperCase());
+            ExchangeRates exchangeRates = service.findByCode(((String) query.get()).toUpperCase());
             var writer = resp.getWriter();
-            writer.println(exchangeRates.isEmpty() ? Optional.empty() :
-                    mapper.exchangeRatesToJson(exchangeRates.get()));
+            writer.println(mapper.exchangeRatesToJson(exchangeRates));
             writer.close();
         } else {
-            Optional<ExchangeRates> exchangeRates = service.findById((Integer) query.get());
+            ExchangeRates exchangeRates = service.findById((Integer) query.get());
             var writer = resp.getWriter();
-            writer.println(exchangeRates.isEmpty() ? Optional.empty() :
-                    mapper.exchangeRatesToJson(exchangeRates.get()));
+            writer.println(mapper.exchangeRatesToJson(exchangeRates));
             writer.close();
         }
     }
@@ -53,18 +51,16 @@ public class ExchangeRateController extends HttpServlet {
             throw new BadRequestException("Не задан rate (double) или ошибка в запросе uri " + req.getRequestURI(),
                     HttpServletResponse.SC_BAD_REQUEST);
         }
-        Optional<ExchangeRates> updateExchangeRates =
+        ExchangeRates updateExchangeRates =
                 service.change((String) query.get(), new BigDecimal(req.getParameter("rate")));
-        if (updateExchangeRates.isPresent()){
-            JsonResponce.jsonResponse(resp, updateExchangeRates.get(), HttpServletResponse.SC_OK);
-        }
+        JsonResponce.jsonResponse(resp, updateExchangeRates, HttpServletResponse.SC_OK);
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getMethod().equals("PATCH")){
+        if (req.getMethod().equals("PATCH")) {
             this.doPatch(req, resp);
         }
-        super.service(req,resp);
+        super.service(req, resp);
     }
 }

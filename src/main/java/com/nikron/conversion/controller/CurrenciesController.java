@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
+import java.util.List;
 
 @RequiredArgsConstructor
 @WebServlet(urlPatterns = "/currencies")
@@ -23,8 +24,13 @@ public class CurrenciesController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         var writer = resp.getWriter();
-        for (Currency c : service.findAll()) {
-            writer.println(mapper.currencyToJson(c));
+        List<Currency> currencies = service.findAll();
+        if (currencies.size() == 0) {
+            writer.println("{\n\"message\": \"Нет ни одной созданной валюты\"\n}");
+        } else {
+            for (Currency c : service.findAll()) {
+                writer.println(mapper.currencyToJson(c));
+            }
         }
         writer.close();
         resp.setStatus(HttpServletResponse.SC_OK);

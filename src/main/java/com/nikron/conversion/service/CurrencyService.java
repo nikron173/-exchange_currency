@@ -5,6 +5,7 @@ import com.nikron.conversion.model.Currency;
 import com.nikron.conversion.repository.CurrencyRepository;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +23,11 @@ public class CurrencyService {
     }
 
     public List<Currency> findAll() {
-        return repository.findAll().get();
+        Optional<List<Currency>> currencies = repository.findAll();
+        if (currencies.isPresent()){
+            return currencies.get();
+        }
+        return new ArrayList<>();
     }
 
     public Currency findById(long id) {
@@ -30,7 +35,8 @@ public class CurrencyService {
         if (currency.isPresent()) {
             return currency.get();
         }
-        throw new NotFoundException("Currency id " + id + " не найден.", HttpServletResponse.SC_NOT_FOUND);
+        throw new NotFoundException("Валюта с id " + id + " не найдена",
+                HttpServletResponse.SC_NOT_FOUND);
     }
 
     public Currency save(Currency currency) {
@@ -50,6 +56,11 @@ public class CurrencyService {
     }
 
     public Currency findByCode(String code) {
-        return repository.findByCode(code).get();
+        Optional<Currency> currency = repository.findByCode(code);
+        if (currency.isPresent()){
+            return currency.get();
+        }
+        throw new NotFoundException("Валюта с кодом " + code + " не найдена",
+                HttpServletResponse.SC_NOT_FOUND);
     }
 }

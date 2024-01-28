@@ -25,7 +25,7 @@ public class CurrencyController extends HttpServlet {
         Optional<?> query = UriStringMatch.uriMatch(req.getRequestURI());
         var writer = resp.getWriter();
         if (query.isEmpty()) {
-            throw new BadRequestException("Uri " + req.getRequestURI() + " not correctly.",
+            throw new BadRequestException("Uri " + req.getRequestURI() + " не корректный",
                     HttpServletResponse.SC_BAD_REQUEST);
         }
         if (query.get() instanceof Long) {
@@ -46,7 +46,7 @@ public class CurrencyController extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Optional<?> query = UriStringMatch.uriMatch(req.getRequestURI());
         if (query.isEmpty()) {
-            throw new BadRequestException("Uri " + req.getRequestURI() + " not correctly.",
+            throw new BadRequestException("Uri " + req.getRequestURI() + " не корректный",
                     HttpServletResponse.SC_BAD_REQUEST);
         }
         if (query.get() instanceof Long) {

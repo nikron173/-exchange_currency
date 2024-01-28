@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Optional;
 
 public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRates> {
-
-    private final Connection connection = new DataBaseServiceImpl().getDataBaseConnection();
     private final ExchangeRatesMapper mapper = ExchangeRatesMapper.getInstanceMapper();
     private static final ExchangeRatesRepository INSTANCE_REPOSITORY = new ExchangeRatesRepository();
 
@@ -36,7 +34,8 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
                 " FROM exchange_rates AS e\n" +
                 " JOIN currency as b ON e.base_currency_id = b.id AND e.id = ?\n" +
                 " JOIN currency as t ON e.target_currency_id = t.id";
-        try (PreparedStatement ps = connection.prepareStatement(findById)) {
+        try (Connection connection = DataBaseServiceImpl.getConnection();
+             PreparedStatement ps = connection.prepareStatement(findById)) {
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next())
@@ -52,7 +51,8 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
                 " from exchange_rates as e\n" +
                 " JOIN currency as b ON e.base_currency_id = b.id\n" +
                 " JOIN currency as t ON e.target_currency_id = t.id and (b.code || t.code) = ?";
-        try (PreparedStatement ps = connection.prepareStatement(findByCode)) {
+        try (Connection connection = DataBaseServiceImpl.getConnection();
+             PreparedStatement ps = connection.prepareStatement(findByCode)) {
             ps.setString(1, code);
             ResultSet rs = ps.executeQuery();
             if (rs.next())
@@ -68,7 +68,8 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
                 " round((1/e.rate), 6) as rev_rate from exchange_rates as e\n" +
                 " JOIN currency as b ON e.base_currency_id = b.id\n" +
                 " JOIN currency as t ON e.target_currency_id = t.id and (t.code || b.code) = ?";
-        try (PreparedStatement ps = connection.prepareStatement(findByCodeReverte)) {
+        try (Connection connection = DataBaseServiceImpl.getConnection();
+             PreparedStatement ps = connection.prepareStatement(findByCodeReverte)) {
             ps.setString(1, code);
             ResultSet rs = ps.executeQuery();
             if (rs.next())
@@ -86,7 +87,8 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
                 " FROM exchange_rates as e \n" +
                 " JOIN currency as b ON e.base_currency_id = b.id \n" +
                 " JOIN currency as t ON e.target_currency_id = t.id";
-        try (PreparedStatement ps = connection.prepareStatement(findAll)) {
+        try (Connection connection = DataBaseServiceImpl.getConnection();
+             PreparedStatement ps = connection.prepareStatement(findAll)) {
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 exchangeRates.add(mapper.resultSetToExchangeRates(rs));
@@ -101,7 +103,8 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
     public Optional<ExchangeRates> save(ExchangeRates tObject) {
         String saveExchangeRates = "INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate)" +
                 " VALUES (?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(saveExchangeRates, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = DataBaseServiceImpl.getConnection();
+             PreparedStatement ps = connection.prepareStatement(saveExchangeRates, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, tObject.getBaseCurrency().getId());
             ps.setLong(2, tObject.getTargetCurrency().getId());
             ps.setBigDecimal(3, tObject.getRate());
@@ -121,7 +124,8 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
 
     public Optional<ExchangeRates> change(Long id, ExchangeRates exchangeRates) {
         String updateExchangeRates = "UPDATE exchange_rates SET rate = ? WHERE id = ?";
-        try (PreparedStatement ps = connection.prepareStatement(updateExchangeRates)) {
+        try (Connection connection = DataBaseServiceImpl.getConnection();
+             PreparedStatement ps = connection.prepareStatement(updateExchangeRates)) {
             ps.setBigDecimal(1, exchangeRates.getRate());
             ps.setLong(2, id);
             ps.executeUpdate();
@@ -136,7 +140,8 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
         findById(id).orElseThrow(() -> new NotFoundException("Не найдет обменник с id " + id,
                 HttpServletResponse.SC_NOT_FOUND));
         String updateExchangeRates = "DELETE FROM exchange_rates WHERE id = ?";
-        try (PreparedStatement ps = connection.prepareStatement(updateExchangeRates)) {
+        try (Connection connection = DataBaseServiceImpl.getConnection();
+             PreparedStatement ps = connection.prepareStatement(updateExchangeRates)) {
             ps.setLong(1, id);
             ps.execute();
         } catch (SQLException e) {

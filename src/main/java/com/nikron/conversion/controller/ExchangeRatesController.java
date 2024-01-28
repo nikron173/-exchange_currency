@@ -14,7 +14,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @WebServlet(urlPatterns = "/exchangeRates")
 public class ExchangeRatesController extends HttpServlet {
@@ -25,7 +24,7 @@ public class ExchangeRatesController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (!mapper.checkParameter(req)){
+        if (!mapper.checkParameter(req)) {
             throw new BadRequestException("Не верно заданы параметры для создания обменника валюты",
                     HttpServletResponse.SC_BAD_REQUEST);
         }
@@ -33,22 +32,20 @@ public class ExchangeRatesController extends HttpServlet {
         dto.setBaseCurrencyCode(req.getParameter("baseCurrencyCode"));
         dto.setTargetCurrencyCode(req.getParameter("targetCurrencyCode"));
         dto.setRate(new BigDecimal(req.getParameter("rate")));
-        Optional<ExchangeRates> exchangeRates = service.addExchangeRates(dto);
-        if (exchangeRates.isPresent()){
-            resp.sendRedirect("/exchangeRate/" +
-                    exchangeRates.get().getBaseCurrency().getCode() +
-                    exchangeRates.get().getTargetCurrency().getCode());
-        }
+        ExchangeRates exchangeRates = service.addExchangeRates(dto);
+        resp.sendRedirect("/exchangeRate/" +
+                exchangeRates.getBaseCurrency().getCode() +
+                exchangeRates.getTargetCurrency().getCode());
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         var writer = resp.getWriter();
-        Optional<List<ExchangeRates>> exchangeRates = service.findAll();
-        if (exchangeRates.isEmpty()) {
-            writer.println(Optional.empty());
+        List<ExchangeRates> exchangeRates = service.findAll();
+        if (exchangeRates.size() == 0) {
+            writer.println("{\n\"message\": \"Нет ни одного созданного обменника валют\"\n}");
         } else {
-            for (ExchangeRates ex : exchangeRates.get()) {
+            for (ExchangeRates ex : exchangeRates) {
                 writer.println(mapper.exchangeRatesToJson(ex));
             }
         }

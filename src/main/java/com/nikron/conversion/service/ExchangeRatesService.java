@@ -12,6 +12,7 @@ import com.nikron.conversion.repository.ExchangeRatesRepository;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,80 +30,88 @@ public class ExchangeRatesService {
         return INSTANCE_SERVICE;
     }
 
-    public Optional<ExchangeRates> findById(long id) {
-        return exchangeRatesRepository.findById(id);
-    }
-
-    public Optional<ExchangeRates> findByCode(String code) {
-        Optional<ExchangeRates> exchangeRates;
-        if ((exchangeRates = exchangeRatesRepository.findByCode(code)).isPresent()) {
-            return exchangeRates;
+    public ExchangeRates findById(long id) {
+        Optional<ExchangeRates> exchangeRates = exchangeRatesRepository.findById(id);
+        if (exchangeRates.isPresent()) {
+            return exchangeRates.get();
         }
-        if ((exchangeRates = exchangeRatesRepository.findByCodeRevert(code)).isPresent()) {
-            return exchangeRates;
+        throw new NotFoundException("Не найден обменник валют с id " + id,
+                HttpServletResponse.SC_NOT_FOUND);
+    }
+
+    public ExchangeRates findByCode(String code) {
+        Optional<ExchangeRates> exchangeRates = exchangeRatesRepository.findByCode(code);
+        if (exchangeRates.isPresent()) {
+            return exchangeRates.get();
         }
-        return Optional.empty();
+        exchangeRates = exchangeRatesRepository.findByCodeRevert(code);
+        if (exchangeRates.isPresent()) {
+            return exchangeRates.get();
+        }
+        throw new NotFoundException("Не найден обменник валют с кодом " + code,
+                HttpServletResponse.SC_NOT_FOUND);
     }
 
-    public Optional<List<ExchangeRates>> findAll() {
-        return exchangeRatesRepository.findAll();
+    public List<ExchangeRates> findAll() {
+        Optional<List<ExchangeRates>> exchangeRatesList = exchangeRatesRepository.findAll();
+        if (exchangeRatesList.isPresent()){
+            return exchangeRatesList.get();
+        }
+        return new ArrayList<>();
     }
 
-    public Optional<ExchangeRates> change(Long id, BigDecimal rate) {
+    public ExchangeRates change(Long id, BigDecimal rate) {
         Optional<ExchangeRates> optionalExchangeRates = exchangeRatesRepository.findById(id);
         if (optionalExchangeRates.isEmpty()) {
-            throw new NotFoundException("Не найден обменник с id " + id, HttpServletResponse.SC_BAD_REQUEST);
+            throw new NotFoundException("Не найден обменник валют с id " + id, HttpServletResponse.SC_BAD_REQUEST);
         }
         ExchangeRates exchangeRates = optionalExchangeRates.get();
         exchangeRates.setRate(rate);
-        return exchangeRatesRepository.change(id, exchangeRates);
+        return exchangeRatesRepository.change(id, exchangeRates).get();
     }
 
-    public Optional<ExchangeRates> change(String code, BigDecimal rate) {
+    public ExchangeRates change(String code, BigDecimal rate) {
         Optional<ExchangeRates> optionalExchangeRates = exchangeRatesRepository.findByCode(code);
         if (optionalExchangeRates.isEmpty()) {
-            throw new NotFoundException("Не найден обменник с id " + code, HttpServletResponse.SC_BAD_REQUEST);
+            throw new NotFoundException("Не найден обменник валют с id " + code,
+                    HttpServletResponse.SC_BAD_REQUEST);
         }
         ExchangeRates exchangeRates = optionalExchangeRates.get();
         exchangeRates.setRate(rate);
-        return exchangeRatesRepository.change(exchangeRates.getId(), exchangeRates);
+        return exchangeRatesRepository.change(exchangeRates.getId(), exchangeRates).get();
     }
 
     public void delete(Long id) {
         exchangeRatesRepository.delete(id);
     }
 
-    public Optional<ExchangeRates> addExchangeRates(ExchangeRatesDto dto) {
+    public ExchangeRates addExchangeRates(ExchangeRatesDto dto) {
         //return repository.save(exchangeRates).get();
         Optional<Currency> baseCurrency = currencyRepository.findByCode(dto.getBaseCurrencyCode());
         Optional<Currency> targetCurrency = currencyRepository.findByCode(dto.getTargetCurrencyCode());
         if (baseCurrency.isEmpty()) {
-            throw new BadRequestException("Не найдет code " + dto.getBaseCurrencyCode(),
+            throw new BadRequestException("Не найден обменник валют с кодом " + dto.getBaseCurrencyCode(),
                     HttpServletResponse.SC_BAD_REQUEST);
         }
         if (targetCurrency.isEmpty()) {
-            throw new BadRequestException("Не найдет code " + dto.getTargetCurrencyCode(),
+            throw new BadRequestException("Не найден обменник валют с кодом " + dto.getTargetCurrencyCode(),
                     HttpServletResponse.SC_BAD_REQUEST);
         }
         ExchangeRates exchangeRates = new ExchangeRates();
         exchangeRates.setBaseCurrency(baseCurrency.get());
         exchangeRates.setTargetCurrency(targetCurrency.get());
         exchangeRates.setRate(dto.getRate());
-        return exchangeRatesRepository.save(exchangeRates);
+        return exchangeRatesRepository.save(exchangeRates).get();
     }
 
     public ExchangeResponseDto exchange(ExchangeRequestDto dto) {
-        Optional<ExchangeRates> exchangeRates = findByCode(dto.getBaseCurrencyCode() + dto.getTargetCurrencyCode());
-        if (exchangeRates.isEmpty()) {
-            throw new BadRequestException("Не найдет обменник валюты " + dto.getBaseCurrencyCode() + " => "
-                    + dto.getTargetCurrencyCode(), HttpServletResponse.SC_BAD_REQUEST);
-        }
+        ExchangeRates exchangeRates = findByCode(dto.getBaseCurrencyCode() + dto.getTargetCurrencyCode());
         ExchangeResponseDto dtoResponse = new ExchangeResponseDto();
-        dtoResponse.setBaseCurrency(exchangeRates.get().getBaseCurrency());
-        dtoResponse.setTargetCurrency(exchangeRates.get().getTargetCurrency());
-        dtoResponse.setRate(exchangeRates.get().getRate());
+        dtoResponse.setBaseCurrency(exchangeRates.getBaseCurrency());
+        dtoResponse.setTargetCurrency(exchangeRates.getTargetCurrency());
+        dtoResponse.setRate(exchangeRates.getRate());
         dtoResponse.setAmount(dto.getAmount());
-        dtoResponse.setConvertedAmount(exchangeRates.get().getRate().multiply(dto.getAmount()));
+        dtoResponse.setConvertedAmount(exchangeRates.getRate().multiply(dto.getAmount()));
         return dtoResponse;
     }
 }
