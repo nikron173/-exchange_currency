@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class DataBaseServiceImpl {
+public class DataBaseService {
 
     private static int poolSize = 5;
 
@@ -29,7 +29,7 @@ public class DataBaseServiceImpl {
         for (int i = 0; i < poolSize; i++){
             Connection connection = getDataBaseConnection();
             var proxyConnection = (Connection) Proxy.newProxyInstance(
-                    DataBaseServiceImpl.class.getClassLoader(),
+                    DataBaseService.class.getClassLoader(),
                     new Class[]{Connection.class},
                     ((proxy, method, args) -> method.getName().equals("close") ?
                             connectionPool.add((Connection)proxy) :
