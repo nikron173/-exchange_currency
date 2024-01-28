@@ -52,7 +52,7 @@ public class ExchangeRateController extends HttpServlet {
                     HttpServletResponse.SC_BAD_REQUEST);
         }
         ExchangeRates updateExchangeRates =
-                service.change((String) query.get(), new BigDecimal(req.getParameter("rate")));
+                service.update((String) query.get(), new BigDecimal(req.getParameter("rate")));
         JsonResponce.jsonResponse(resp, updateExchangeRates, HttpServletResponse.SC_OK);
     }
 

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRates> {
+public class ExchangeRatesRepository implements Repository<Long, ExchangeRates> {
     private final ExchangeRatesMapper mapper = ExchangeRatesMapper.getInstanceMapper();
     private static final ExchangeRatesRepository INSTANCE_REPOSITORY = new ExchangeRatesRepository();
 
@@ -81,7 +81,7 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
     }
 
     @Override
-    public Optional<List<ExchangeRates>> findAll() {
+    public List<ExchangeRates> findAll() {
         List<ExchangeRates> exchangeRates = new ArrayList<>();
         String findAll = "SELECT e.id, b.id, b.code, b.full_name, b.sign, t.id, t.code, t.full_name, t.sign, e.rate " +
                 " FROM exchange_rates as e \n" +
@@ -93,7 +93,7 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
             while (rs.next()) {
                 exchangeRates.add(mapper.resultSetToExchangeRates(rs));
             }
-            return exchangeRates.size() == 0 ? Optional.empty() : Optional.of(exchangeRates);
+            return exchangeRates;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -122,7 +122,7 @@ public class ExchangeRatesRepository implements ImpRepository<Long, ExchangeRate
         }
     }
 
-    public Optional<ExchangeRates> change(Long id, ExchangeRates exchangeRates) {
+    public Optional<ExchangeRates> update(Long id, ExchangeRates exchangeRates) {
         String updateExchangeRates = "UPDATE exchange_rates SET rate = ? WHERE id = ?";
         try (Connection connection = DataBaseService.getConnection();
              PreparedStatement ps = connection.prepareStatement(updateExchangeRates)) {

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class CurrencyRepository implements ImpRepository<Long, Currency> {
+public class CurrencyRepository implements Repository<Long, Currency> {
     private final CurrencyMapper mapper = CurrencyMapper.getInstanceMapper();
 
     private final static CurrencyRepository INSTANCE_REPOSITORY = new CurrencyRepository();
@@ -46,7 +46,7 @@ public class CurrencyRepository implements ImpRepository<Long, Currency> {
     }
 
     @Override
-    public Optional<List<Currency>> findAll() {
+    public List<Currency> findAll() {
         List<Currency> currencies = new ArrayList<>();
         String findAll = "SELECT id, code, full_name, sign FROM currency";
         try (Connection connection = DataBaseService.getConnection();
@@ -55,7 +55,7 @@ public class CurrencyRepository implements ImpRepository<Long, Currency> {
             while (rs.next()) {
                 currencies.add(mapper.resultSetToCurrency(rs));
             }
-            return currencies.size() == 0 ? Optional.empty() : Optional.of(currencies);
+            return currencies;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -81,7 +81,7 @@ public class CurrencyRepository implements ImpRepository<Long, Currency> {
         }
     }
 
-    public Optional<Currency> change(Long id, Currency currency) {
+    public Optional<Currency> update(Long id, Currency currency) {
         findById(id).orElseThrow(() -> new NotFoundException("Объект с id " + id + " не найден!",
                 HttpServletResponse.SC_NOT_FOUND));
         String updateCurrency = "UPDATE currency SET code=?, full_name=?, sign=? WHERE id=?";

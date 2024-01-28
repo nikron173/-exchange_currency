@@ -12,7 +12,6 @@ import com.nikron.conversion.repository.ExchangeRatesRepository;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,24 +52,20 @@ public class ExchangeRatesService {
     }
 
     public List<ExchangeRates> findAll() {
-        Optional<List<ExchangeRates>> exchangeRatesList = exchangeRatesRepository.findAll();
-        if (exchangeRatesList.isPresent()){
-            return exchangeRatesList.get();
-        }
-        return new ArrayList<>();
+        return exchangeRatesRepository.findAll();
     }
 
-    public ExchangeRates change(Long id, BigDecimal rate) {
+    public ExchangeRates update(Long id, BigDecimal rate) {
         Optional<ExchangeRates> optionalExchangeRates = exchangeRatesRepository.findById(id);
         if (optionalExchangeRates.isEmpty()) {
             throw new NotFoundException("Не найден обменник валют с id " + id, HttpServletResponse.SC_BAD_REQUEST);
         }
         ExchangeRates exchangeRates = optionalExchangeRates.get();
         exchangeRates.setRate(rate);
-        return exchangeRatesRepository.change(id, exchangeRates).get();
+        return exchangeRatesRepository.update(id, exchangeRates).get();
     }
 
-    public ExchangeRates change(String code, BigDecimal rate) {
+    public ExchangeRates update(String code, BigDecimal rate) {
         Optional<ExchangeRates> optionalExchangeRates = exchangeRatesRepository.findByCode(code);
         if (optionalExchangeRates.isEmpty()) {
             throw new NotFoundException("Не найден обменник валют с id " + code,
@@ -78,7 +73,7 @@ public class ExchangeRatesService {
         }
         ExchangeRates exchangeRates = optionalExchangeRates.get();
         exchangeRates.setRate(rate);
-        return exchangeRatesRepository.change(exchangeRates.getId(), exchangeRates).get();
+        return exchangeRatesRepository.update(exchangeRates.getId(), exchangeRates).get();
     }
 
     public void delete(Long id) {

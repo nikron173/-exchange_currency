@@ -5,13 +5,12 @@ import com.nikron.conversion.model.Currency;
 import com.nikron.conversion.repository.CurrencyRepository;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public class CurrencyService {
 
-    private final CurrencyRepository repository = CurrencyRepository.getInstanceRepository();
+    private final CurrencyRepository currencyRepository = CurrencyRepository.getInstanceRepository();
 
     private static final CurrencyService INSTANCE_SERVICE = new CurrencyService();
 
@@ -23,15 +22,11 @@ public class CurrencyService {
     }
 
     public List<Currency> findAll() {
-        Optional<List<Currency>> currencies = repository.findAll();
-        if (currencies.isPresent()){
-            return currencies.get();
-        }
-        return new ArrayList<>();
+        return currencyRepository.findAll();
     }
 
     public Currency findById(long id) {
-        Optional<Currency> currency = repository.findById(id);
+        Optional<Currency> currency = currencyRepository.findById(id);
         if (currency.isPresent()) {
             return currency.get();
         }
@@ -40,23 +35,23 @@ public class CurrencyService {
     }
 
     public Currency save(Currency currency) {
-        return repository.save(currency).get();
+        return currencyRepository.save(currency).get();
     }
 
     public void delete(long id) {
-        repository.delete(id);
+        currencyRepository.delete(id);
     }
 
     public void delete(String code) {
-        repository.delete(code);
+        currencyRepository.delete(code);
     }
 
-    public Currency change(long id, Currency currency) {
-        return repository.change(id, currency).get();
+    public Currency update(long id, Currency currency) {
+        return currencyRepository.update(id, currency).get();
     }
 
     public Currency findByCode(String code) {
-        Optional<Currency> currency = repository.findByCode(code);
+        Optional<Currency> currency = currencyRepository.findByCode(code);
         if (currency.isPresent()){
             return currency.get();
         }
