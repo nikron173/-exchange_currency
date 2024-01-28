@@ -65,7 +65,7 @@ public class DataBaseService {
     }
 
     private static String getConnectionUrl() {
-        URL url = ClassLoader.getSystemClassLoader().getResource("db/test.db");
+        URL url = DataBaseService.class.getClassLoader().getResource("db/test.db");
         if (Objects.nonNull(url)) {
             try {
                 return String.format("jdbc:sqlite:" + url.toURI());
